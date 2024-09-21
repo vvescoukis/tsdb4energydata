@@ -1,0 +1,133 @@
+
+openapi: 3.0.0
+info:
+  title: Energy Data API
+  description: This API provides energy-related data such as electricity prices and consumption across different countries.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: Energy Data API Server
+
+paths:
+  /energy-data:
+    get:
+      summary: Retrieve energy data
+      description: Retrieve energy data like electricity prices or consumption for a specific country and date range, with optional aggregation.
+      parameters:
+        - in: query
+          name: measurement
+          required: true
+          schema:
+            type: string
+            enum: [electricity_price, consumption]
+          description: Specifies the type of energy data to retrieve.
+        - in: query
+          name: country
+          required: true
+          schema:
+            type: string
+          description: The country for which the data is being requested.
+        - in: query
+          name: start_date
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: The start of the data range (ISO 8601 date format).
+        - in: query
+          name: end_date
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: The end of the data range (ISO 8601 date format).
+        - in: query
+          name: aggregation_window
+          required: false
+          schema:
+            type: string
+            enum: [hourly, daily, weekly]
+          description: The aggregation period for the data.
+      responses:
+        '200':
+          description: Successfully retrieved energy data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      measurement:
+                        type: string
+                      country:
+                        type: string
+                      aggregation_window:
+                        type: string
+                      start_date:
+                        type: string
+                        format: date-time
+                      end_date:
+                        type: string
+                        format: date-time
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            value:
+                              type: number
+              example:
+                status: "success"
+                data:
+                  measurement: "electricity_price"
+                  country: "USA"
+                  aggregation_window: "daily"
+                  start_date: "2024-01-01T00:00:00Z"
+                  end_date: "2024-01-31T23:59:59Z"
+                  results:
+                    - date: "2024-01-01"
+                      value: 45.32
+                    - date: "2024-01-02"
+                      value: 47.12
+                    - date: "2024-01-03"
+                      value: 44.90
+                    - date: "2024-01-04"
+                      value: 46.50
+                    - date: "2024-01-05"
+                      value: 48.10
+        '400':
+          description: Bad Request, invalid or missing parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  error:
+                    type: string
+              example:
+                status: "error"
+                error: "Missing or invalid query parameter: country"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  error:
+                    type: string
+              example:
+                status: "error"
+                error: "Internal server error"
